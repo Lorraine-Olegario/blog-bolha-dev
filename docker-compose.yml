@@ -1,0 +1,56 @@
+# version: '3.8'
+
+services:
+    postgres:
+        image: postgres:latest
+        container_name: postgres_container
+        ports:
+            - "5432:5432"
+        environment:
+            POSTGRES_DB: blog
+            POSTGRES_USER: admin
+            POSTGRES_PASSWORD: admin
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+        healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U admin -d blog"]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+
+
+    webserver:
+        image: 'nginx:alpine'
+        working_dir: /app
+        volumes:
+            - '.:/app'
+            - './phpdocker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf'
+        ports:
+            - '8181:80'
+         
+
+    php-fpm:
+        build: phpdocker/php-fpm
+        working_dir: /app
+        volumes:
+            - '.:/app'
+            - './phpdocker/php-fpm/php-ini-overrides.ini:/etc/php/8.3/fpm/conf.d/99-overrides.ini'
+            - './phpdocker/php-fpm/php-ini-overrides.ini:/etc/php/8.3/cli/conf.d/99-overrides.ini'
+        healthcheck:
+            test: ["CMD", "php-fpm", "-t"]
+            interval: 10s
+            timeout: 5s
+        # entrypoint: ["/app/phpdocker/php-fpm/entrypoint.sh"]
+
+
+networks:
+    app-network:
+        driver: bridge
+
+volumes:
+    postgres_data:
+        driver: local
+
+
+
+
