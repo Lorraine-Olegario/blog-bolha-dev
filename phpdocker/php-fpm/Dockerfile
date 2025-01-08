@@ -8,9 +8,5 @@ RUN apt-get update \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
 
-# COPY ./entrypoint.sh /app/phpdocker/php-fpm/entrypoint.sh
-# RUN chmod +x /app/phpdocker/php-fpm/entrypoint.sh
-
-# ENTRYPOINT ["/app/phpdocker/php-fpm/entrypoint.sh"]
-
-# CMD ["php-fpm"]
+COPY . /app
+CMD bash -c "cp .env.example .env && composer install && php artisan app:install"
