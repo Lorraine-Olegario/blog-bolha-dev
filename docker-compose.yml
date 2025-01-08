@@ -17,6 +17,8 @@ services:
             interval: 10s
             timeout: 5s
             retries: 5
+        networks:
+            - app-network
 
 
     webserver:
@@ -27,8 +29,16 @@ services:
             - './phpdocker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf'
         ports:
             - '8181:80'
+        environment:
+            - DB_CONNECTION=pgsql
+            - DB_HOST=postgres
+            - DB_PORT=5432
+            - DB_DATABASE=blog
+            - DB_USERNAME=admin
+            - DB_PASSWORD=admin
+        networks:
+            - app-network
          
-
     php-fpm:
         build: phpdocker/php-fpm
         working_dir: /app
@@ -40,7 +50,8 @@ services:
             test: ["CMD", "php-fpm", "-t"]
             interval: 10s
             timeout: 5s
-        # entrypoint: ["/app/phpdocker/php-fpm/entrypoint.sh"]
+        networks:
+            - app-network
 
 
 networks:
